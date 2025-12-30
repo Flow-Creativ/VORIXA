@@ -4,5 +4,9 @@ set -o errexit
 
 pip install -r requirements.txt
 echo "➡️ Installing Playwright Chromium..."
+
+# Install to project directory to persist
+export PLAYWRIGHT_BROWSERS_PATH=$PWD/pw-browsers
 playwright install chromium
+
 echo "✅ Playwright Installation Complete."

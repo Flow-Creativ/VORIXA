@@ -1,3 +1,10 @@
+import os
+
+# Set Playwright Browsers Path to local if exists (for Render)
+local_browsers_path = os.path.abspath("pw-browsers")
+if os.path.exists(local_browsers_path):
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = local_browsers_path
+
 # Selectors for Google Maps
 SELECTORS = {
     "listings": '//div[contains(@class, "Nv2PK")]',
