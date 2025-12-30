@@ -4,10 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lead Scraper Tool</title>
+    <title>Vorixa - Lead Scraper</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -50,14 +52,12 @@
     <!-- Header -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-lg">
-                        L</div>
-                    <span class="font-bold text-xl tracking-tight">LeadScraper</span>
+            <div class="flex justify-between h-20 items-center">
+                <div class="flex items-center gap-2">
+                    <img src="{{ url_for('static', filename='favicon.png') }}" class="h-14 w-auto object-contain pl-1"
+                        alt="Vorixa Logo">
                 </div>
-                <div class="text-xs font-mono text-gray-400">v1.2 (Stateless)</div>
+                <div class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">v1.3</div>
             </div>
         </div>
     </header>
@@ -180,11 +180,12 @@
     <footer class="bg-white border-t border-gray-200 mt-auto">
         <div
             class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-sm text-gray-400">© 2025 LeadScraper Tool. All rights reserved.</p>
+            <p class="text-sm text-gray-400">© 2025 Vorixa. All rights reserved.</p>
             <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-500 font-medium">Built by</span>
                 <a href="https://flowreativ.com" target="_blank"
                     class="text-sm font-bold text-black border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50 transition-colors">flowreativ.com</a>
+                <span class="text-sm text-gray-500 font-medium">Teams</span>
             </div>
         </div>
     </footer>

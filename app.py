@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 from datetime import datetime
-from scraper.maps import search_maps
+from scraper.api import search_maps
 
 app = Flask(__name__)
 
