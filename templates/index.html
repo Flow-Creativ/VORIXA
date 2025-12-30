@@ -8,19 +8,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
-    <!-- Favicon -->
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
     <style>
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #000;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             animation: spin 0.8s linear infinite;
         }
 
@@ -34,141 +34,184 @@
             }
         }
 
-        input[type="radio"]:checked+div {
-            border-color: #000;
-            background-color: #f9fafb;
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease-out forwards;
         }
 
-        input[type="radio"]:checked+div .radio-circle {
-            background-color: #000;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
-    <!-- SheetJS for Client-Side Excel Export -->
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 </head>
 
-<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-sans">
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col antialiased selection:bg-black selection:text-white">
 
     <!-- Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20 items-center">
+    <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6">
+            <div class="flex justify-between h-14 items-center">
                 <div class="flex items-center gap-2">
-                    <img src="{{ url_for('static', filename='favicon.png') }}" class="h-14 w-auto object-contain pl-1"
+                    <img src="{{ url_for('static', filename='favicon.png') }}" class="h-8 w-auto object-contain"
                         alt="Vorixa Logo">
+                    <span class="font-bold text-lg tracking-tight">Vorixa</span>
                 </div>
-                <div class="text-xs font-mono text-gray-400 bg-gray-100 px-2 py-1 rounded">v1.3</div>
+                <div class="flex items-center">
+                    <span
+                        class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-green-50 text-green-700 border border-green-100">
+                        <span class="relative flex h-1.5 w-1.5">
+                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                        </span>
+                        Operational
+                    </span>
+                </div>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
+    <main class="flex-grow flex flex-col items-center pt-8 pb-12 px-4">
 
-        <!-- Card Container -->
-        <div class="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden relative">
+        <!-- Hero Section -->
+        <div class="text-center max-w-xl mx-auto mb-8 space-y-3 fade-in-up">
+            <h1 class="text-3xl font-bold tracking-tight text-gray-900">
+                Find Your Next Customer
+            </h1>
+            <p class="text-sm text-gray-500 leading-relaxed">
+                Extract verified business leads from Google Maps in seconds.
+            </p>
+        </div>
 
-            <!-- Card Header -->
-            <div class="bg-white p-8 pb-6 border-b border-gray-100 flex justify-between items-start">
-                <div>
-                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Generate New Leads</h1>
-                    <p class="text-sm text-gray-500 mt-1">Extract potential customers from Google Maps.</p>
-                </div>
-                <!-- Watermark Mobile/Inside Card -->
-                <div
-                    class="sm:hidden text-[10px] font-medium text-gray-400 uppercase tracking-widest border border-gray-200 px-3 py-1 rounded-full">
-                    by flowreativ
-                </div>
-            </div>
-
-            <!-- Form Section -->
-            <div class="p-8 pt-6">
-                <form id="scrapeForm" class="space-y-8">
-
-                    <!-- Platform Selection -->
-                    <!-- Platform Selection Hidden (Default Maps) -->
+        <!-- Main Card -->
+        <div class="w-full max-w-xl bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden fade-in-up"
+            style="animation-delay: 0.1s;">
+            <div class="p-6 sm:p-8">
+                <form id="scrapeForm" class="space-y-6">
                     <input type="hidden" name="target" value="maps">
 
-                    <!-- Search Parameters -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Search
-                            Configuration</label>
-                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                            <!-- Keyword -->
-                            <div class="md:col-span-8">
-                                <label for="keyword" class="block text-xs font-medium text-gray-600 mb-2">Keyword /
-                                    Niche</label>
+                    <div class="space-y-5">
+                        <!-- Keyword Input -->
+                        <div class="space-y-1.5">
+                            <label for="keyword"
+                                class="block text-xs font-bold text-gray-700 uppercase tracking-wide">Target Industry /
+                                Niche</label>
+                            <div class="relative">
+                                <div
+                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
                                 <input type="text" name="keyword" id="keyword" required
-                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-black focus:border-transparent block p-4 shadow-sm placeholder-gray-400 font-medium transition-all"
-                                    placeholder="e.g. 'Coffee Shop Jakarta Selatan' or 'Fashion Blogger'">
-                            </div>
-
-                            <!-- Max Results -->
-                            <div class="md:col-span-4">
-                                <label for="max_results" class="block text-xs font-medium text-gray-600 mb-2">Target
-                                    Results (Max)</label>
-                                <input type="number" name="max_results" id="max_results" value="10" min="1" max="500"
-                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-black focus:border-transparent block p-4 shadow-sm font-medium transition-all">
+                                    class="block w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:ring-1 focus:ring-black focus:border-black focus:bg-white transition-all text-sm placeholder-gray-400"
+                                    placeholder="e.g. Coffee Shops in Brooklyn">
                             </div>
                         </div>
 
-
+                        <!-- Max Results Input -->
+                        <div class="space-y-1.5">
+                            <label for="max_results"
+                                class="block text-xs font-bold text-gray-700 uppercase tracking-wide">Number of
+                                Leads</label>
+                            <div class="relative">
+                                <div
+                                    class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                    </svg>
+                                </div>
+                                <input type="number" name="max_results" id="max_results" value="10" min="1" max="500"
+                                    class="block w-full pl-9 pr-3 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg focus:ring-1 focus:ring-black focus:border-black focus:bg-white transition-all text-sm">
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Action -->
-                    <div class="pt-4">
-                        <button type="submit" id="submitBtn"
-                            class="w-full text-white bg-black hover:bg-gray-800 font-bold rounded-xl text-base px-5 py-4 text-center transition-all flex justify-center items-center shadow-lg hover:shadow-xl transform active:scale-[0.99] disabled:opacity-75 disabled:cursor-wait">
-                            <span>Start Generating Leads</span>
-                        </button>
+                    <button type="submit" id="submitBtn"
+                        class="w-full flex justify-center items-center py-3 px-4 border border-transparent text-sm font-bold rounded-lg text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900 transition-all shadow-md active:scale-[0.99] disabled:opacity-70 disabled:cursor-wait">
+                        <span>Start Extraction</span>
+                    </button>
+
+                    <!-- Simplified Trust Signals -->
+                    <div class="flex justify-center items-center gap-4 text-xs text-gray-400 pt-2">
+                        <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor"
+                                viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                    clip-rule="evenodd"></path>
+                            </svg> Verified Data</span>
+                        <span class="flex items-center gap-1"><svg class="w-3 h-3" fill="currentColor"
+                                viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                                    clip-rule="evenodd"></path>
+                            </svg> Secure</span>
                     </div>
                 </form>
 
                 <!-- Status & Feedback -->
-                <div id="statusMessage"
-                    class="hidden mt-8 p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 transition-all animate-fade-in-up">
-                    <div class="flex items-center gap-3">
-                        <p class="text-sm font-semibold text-gray-900" id="msgText">Searching...</p>
-                    </div>
-                    <div id="downloadContainer" class="hidden">
-                        <a id="downloadLink" href="#"
-                            class="inline-flex items-center gap-2 text-xs text-white bg-green-600 hover:bg-green-700 px-5 py-2.5 rounded-lg font-bold transition-all shadow-md hover:shadow-lg">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            Download CSV/Excel
-                        </a>
+                <div id="statusMessage" class="hidden mt-6 p-4 rounded-xl bg-gray-50 border border-gray-200 fade-in-up">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
+                        <div class="flex items-center gap-3 text-left">
+                            <div id="statusIcon" class="text-lg"></div>
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900" id="msgTitle">Status</h4>
+                                <p class="text-xs text-gray-500" id="msgText">Initializing...</p>
+                            </div>
+                        </div>
+                        <div id="downloadContainer" class="hidden">
+                            <a id="downloadLink" href="#"
+                                class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                Download Excel
+                            </a>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <!-- Results Table Container -->
-        <div id="resultsTableContainer" class="hidden w-full max-w-5xl mt-8 cursor-default animate-fade-in-up pb-10">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
-                    <h3 class="text-lg font-bold text-gray-900">Preview Results</h3>
-                    <div class="flex items-center space-x-2">
-                        <button id="prevPageBtn"
-                            class="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Previous</button>
-                        <span id="pageIndicator"
-                            class="text-xs font-mono font-medium text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">Page
-                            1</span>
-                        <button id="nextPageBtn"
-                            class="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Next</button>
-                    </div>
+        <!-- Results Table -->
+        <div id="resultsTableContainer" class="hidden w-full max-w-7xl mt-10 fade-in-up pb-10">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <h3 class="text-base font-bold text-gray-900">Results</h3>
+                <div class="flex items-center gap-2">
+                    <button id="prevPageBtn"
+                        class="p-1.5 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"><svg
+                            class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7">
+                            </path>
+                        </svg></button>
+                    <span id="pageIndicator"
+                        class="text-xs font-mono font-medium text-gray-500 bg-white px-2 py-1 border border-gray-200 rounded">1/1</span>
+                    <button id="nextPageBtn"
+                        class="p-1.5 text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"><svg
+                            class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                            </path>
+                        </svg></button>
                 </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left text-gray-500">
-                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
-                            <tr id="tableHead">
-                                <!-- Headers -->
-                            </tr>
+                    <table class="w-full text-xs text-left text-gray-500">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-50 border-b border-gray-100">
+                            <tr id="tableHead"></tr>
                         </thead>
-                        <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
-                            <!-- Rows -->
-                        </tbody>
+                        <tbody id="tableBody" class="divide-y divide-gray-100"></tbody>
                     </table>
                 </div>
             </div>
@@ -176,17 +219,11 @@
 
     </main>
 
-    <!-- Footer -->
     <footer class="bg-white border-t border-gray-200 mt-auto">
-        <div
-            class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-sm text-gray-400">© 2025 Vorixa. All rights reserved.</p>
-            <div class="flex items-center gap-2">
-                <span class="text-sm text-gray-500 font-medium">Built by</span>
-                <a href="https://flowreativ.com" target="_blank"
-                    class="text-sm font-bold text-black border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50 transition-colors">flowreativ.com</a>
-                <span class="text-sm text-gray-500 font-medium">Teams</span>
-            </div>
+        <div class="max-w-4xl mx-auto py-6 px-4 text-center">
+            <p class="text-xs text-gray-400">© 2025 Vorixa. <span class="mx-1">•</span> Made by <a
+                    href="https://flowreativ.com" target="_blank"
+                    class="font-medium hover:text-gray-600 transition-colors">flowreativ.com teams</a></p>
         </div>
     </footer>
 
@@ -195,9 +232,6 @@
         let currentPage = 1;
         const resultsPerPage = 10;
 
-
-
-        // CSV Export fallback using Blob if SheetJS fails or for simplicity
         function exportToCSV(data) {
             const replacer = (key, value) => value === null ? '' : value;
             const header = Object.keys(data[0]);
@@ -216,7 +250,6 @@
             document.body.removeChild(a);
         }
 
-        // Excel Export using SheetJS
         function exportToExcel() {
             if (typeof XLSX === 'undefined') {
                 console.warn("SheetJS not loaded, falling back to basic CSV");
@@ -224,7 +257,6 @@
                 return;
             }
             if (allResults.length === 0) return;
-
             const ws = XLSX.utils.json_to_sheet(allResults);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Leads");
@@ -240,16 +272,16 @@
             e.preventDefault();
 
             const submitBtn = document.getElementById('submitBtn');
-            const originalBtnText = submitBtn.innerHTML;
+            const originalBtnContent = submitBtn.innerHTML;
 
             submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loader"></div>';
+            submitBtn.innerHTML = '<div class="loader mr-2"></div><span>Run</span>';
+            submitBtn.classList.add('cursor-wait');
 
             const statusDiv = document.getElementById('statusMessage');
             statusDiv.classList.add('hidden');
             document.getElementById('resultsTableContainer').classList.add('hidden');
 
-            // Reset Data
             allResults = [];
             currentPage = 1;
 
@@ -260,42 +292,50 @@
                     method: 'POST',
                     body: formData
                 });
-
                 const data = await response.json();
 
+                const msgTitle = document.getElementById('msgTitle');
                 const msgText = document.getElementById('msgText');
+                const statusIcon = document.getElementById('statusIcon');
                 const downloadContainer = document.getElementById('downloadContainer');
 
                 statusDiv.classList.remove('hidden');
-                msgText.textContent = data.message;
 
                 if (data.status === 'success') {
-                    statusDiv.className = "mt-8 p-4 rounded-xl bg-green-50 border border-green-100 flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up";
-                    msgText.className = "text-sm font-bold text-green-700";
+                    statusDiv.className = "mt-6 p-4 rounded-xl bg-green-50 border border-green-100 fade-in-up";
+                    msgTitle.textContent = "Done";
+                    msgTitle.className = "text-sm font-bold text-green-800";
+                    msgText.textContent = data.message;
+                    msgText.className = "text-xs text-green-600";
+                    statusIcon.innerHTML = "✅";
 
                     if (data.results && data.results.length > 0) {
                         allResults = data.results;
-                        downloadContainer.classList.remove('hidden'); // Show download button
+                        downloadContainer.classList.remove('hidden');
                         renderTablePage(1);
                     }
-
                 } else {
                     const isError = data.status === 'danger';
-                    statusDiv.className = `mt-8 p-4 rounded-xl border flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up ${isError ? 'bg-red-50 border-red-100' : 'bg-yellow-50 border-yellow-100'}`;
-                    msgText.className = `text-sm font-bold ${isError ? 'text-red-700' : 'text-yellow-700'}`;
+                    statusDiv.className = `mt-6 p-4 rounded-xl border fade-in-up ${isError ? 'bg-red-50 border-red-100' : 'bg-yellow-50 border-yellow-100'}`;
+                    msgTitle.textContent = isError ? "Error" : "Info";
+                    msgTitle.className = `text-sm font-bold ${isError ? 'text-red-800' : 'text-yellow-800'}`;
+                    msgText.textContent = data.message;
+                    msgText.className = `text-xs ${isError ? 'text-red-600' : 'text-yellow-600'}`;
+                    statusIcon.innerHTML = isError ? "❌" : "⚠️";
                     downloadContainer.classList.add('hidden');
                 }
 
             } catch (error) {
                 console.error(error);
-                const statusDiv = document.getElementById('statusMessage');
                 statusDiv.classList.remove('hidden');
-                statusDiv.className = "mt-8 p-4 rounded-xl bg-red-50 border border-red-100 flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up";
-                document.getElementById('msgText').className = "text-sm font-bold text-red-700";
-                document.getElementById('msgText').textContent = "Connection Error. Check console/terminal.";
+                statusDiv.className = "mt-6 p-4 rounded-xl bg-red-50 border border-red-100 fade-in-up";
+                document.getElementById('msgTitle').textContent = "Connection Error";
+                document.getElementById('msgText').textContent = "Check terminal/console.";
+                document.getElementById('statusIcon').innerHTML = "🔌";
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = originalBtnText;
+                submitBtn.innerHTML = originalBtnContent;
+                submitBtn.classList.remove('cursor-wait');
             }
         });
 
@@ -308,7 +348,6 @@
             const prevBtn = document.getElementById('prevPageBtn');
             const nextBtn = document.getElementById('nextPageBtn');
 
-            // Calculate Slice
             const start = (page - 1) * resultsPerPage;
             const end = start + resultsPerPage;
             const pageData = allResults.slice(start, end);
@@ -319,32 +358,29 @@
 
             if (pageData.length === 0) return;
 
-            // Defined Columns for Table (exclude raw lat/lng/booleans for cleaner UI)
             const displayKeys = ['name', 'category', 'rating', 'review_count', 'phone', 'website', 'address'];
 
-            // Headers
             displayKeys.forEach(key => {
                 const th = document.createElement('th');
-                th.className = "px-6 py-4 font-semibold text-gray-900 whitespace-nowrap bg-gray-50";
+                th.className = "px-4 py-3 font-semibold text-gray-900 whitespace-nowrap bg-gray-50/50";
                 th.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                 tableHead.appendChild(th);
             });
 
-            // Body
             pageData.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-100";
+                tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-50";
 
                 displayKeys.forEach(key => {
                     const td = document.createElement('td');
-                    td.className = "px-6 py-4 text-sm text-gray-700 whitespace-nowrap";
+                    td.className = "px-4 py-3 text-gray-700 whitespace-nowrap";
 
                     const value = row[key] || '-';
 
                     if (key === 'website' && row[key] && row[key] !== 'Not Found') {
-                        td.innerHTML = `<a href="${row[key]}" target="_blank" class="text-blue-600 hover:underline">Visit Site</a>`;
+                        td.innerHTML = `<a href="${row[key]}" target="_blank" class="text-blue-600 hover:underline">Link</a>`;
                     } else if (key === 'rating') {
-                        td.innerHTML = `<span class="font-bold text-yellow-500">★</span> ${value}`;
+                        td.innerHTML = `<span class="text-orange-500 font-bold">★ ${value}</span>`;
                     } else {
                         td.textContent = value;
                     }
@@ -353,8 +389,7 @@
                 tableBody.appendChild(tr);
             });
 
-            // Controls
-            pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+            pageIndicator.textContent = `${currentPage}/${totalPages}`;
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages;
 

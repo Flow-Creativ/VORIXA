@@ -14,7 +14,21 @@ def setup_browser(playwright, headless=True):
         viewport=VIEWPORT,
         user_agent=USER_AGENT
     )
+    
+    # Block resources to speed up loading
+    async def route_intercept(route):
+        if route.request.resource_type in ["image", "font", "stylesheet"]:
+            await route.abort()
+        else:
+            await route.continue_()
+
     page = context.new_page()
+    # Note: route interception in sync API is page.route("**/*", handler)
+    # But since we are likely using sync_api, we need to implement it correctly.
+    # The current setup code doesn't show import, but context is synced.
+    
+    page.route("**/*", lambda route: route.abort() if route.request.resource_type in ["image", "font", "stylesheet"] else route.continue_())
+    
     return browser, context, page
 
 def export_to_csv(data, filename="leads.csv", output_dir="scraper/output"):
