@@ -3,7 +3,7 @@ services:
     name: gmaps-scraper
     env: python
     buildCommand: ./build.sh
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --timeout 300
     envVars:
       - key: PYTHON_VERSION
         value: 3.9.0
