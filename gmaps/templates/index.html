@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lead Scraper Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #000;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        input[type="radio"]:checked+div {
+            border-color: #000;
+            background-color: #f9fafb;
+        }
+
+        input[type="radio"]:checked+div .radio-circle {
+            background-color: #000;
+        }
+    </style>
+    <!-- SheetJS for Client-Side Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+</head>
+
+<body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-lg">
+                        L</div>
+                    <span class="font-bold text-xl tracking-tight">LeadScraper</span>
+                </div>
+                <div class="text-xs font-mono text-gray-400">v1.2 (Stateless)</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col items-center justify-center p-4 sm:p-8">
+
+        <!-- Card Container -->
+        <div class="w-full max-w-5xl bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden relative">
+
+            <!-- Card Header -->
+            <div class="bg-white p-8 pb-6 border-b border-gray-100 flex justify-between items-start">
+                <div>
+                    <h1 class="text-2xl font-bold tracking-tight text-gray-900">Generate New Leads</h1>
+                    <p class="text-sm text-gray-500 mt-1">Extract potential customers from Google Maps & Instagram.</p>
+                </div>
+                <!-- Watermark Mobile/Inside Card -->
+                <div
+                    class="sm:hidden text-[10px] font-medium text-gray-400 uppercase tracking-widest border border-gray-200 px-3 py-1 rounded-full">
+                    by flowreativ
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="p-8 pt-6">
+                <form id="scrapeForm" class="space-y-8">
+
+                    <!-- Platform Selection -->
+                    <!-- Platform Selection Hidden (Default Maps) -->
+                    <input type="hidden" name="target" value="maps">
+
+                    <!-- Search Parameters -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">2. Search
+                            Configuration</label>
+                        <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                            <!-- Keyword -->
+                            <div class="md:col-span-8">
+                                <label for="keyword" class="block text-xs font-medium text-gray-600 mb-2">Keyword /
+                                    Niche</label>
+                                <input type="text" name="keyword" id="keyword" required
+                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-black focus:border-transparent block p-4 shadow-sm placeholder-gray-400 font-medium transition-all"
+                                    placeholder="e.g. 'Coffee Shop Jakarta Selatan' or 'Fashion Blogger'">
+                            </div>
+
+                            <!-- Max Results -->
+                            <div class="md:col-span-4">
+                                <label for="max_results" class="block text-xs font-medium text-gray-600 mb-2">Target
+                                    Results (Max)</label>
+                                <input type="number" name="max_results" id="max_results" value="10" min="1" max="500"
+                                    class="w-full bg-white border border-gray-200 text-gray-900 text-sm rounded-lg focus:ring-2 focus:ring-black focus:border-transparent block p-4 shadow-sm font-medium transition-all">
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    <!-- Action -->
+                    <div class="pt-4">
+                        <button type="submit" id="submitBtn"
+                            class="w-full text-white bg-black hover:bg-gray-800 font-bold rounded-xl text-base px-5 py-4 text-center transition-all flex justify-center items-center shadow-lg hover:shadow-xl transform active:scale-[0.99] disabled:opacity-75 disabled:cursor-wait">
+                            <span>Start Generating Leads</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Status & Feedback -->
+                <div id="statusMessage"
+                    class="hidden mt-8 p-4 rounded-xl bg-gray-50 border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4 transition-all animate-fade-in-up">
+                    <div class="flex items-center gap-3">
+                        <p class="text-sm font-semibold text-gray-900" id="msgText">Searching...</p>
+                    </div>
+                    <div id="downloadContainer" class="hidden">
+                        <a id="downloadLink" href="#"
+                            class="inline-flex items-center gap-2 text-xs text-white bg-green-600 hover:bg-green-700 px-5 py-2.5 rounded-lg font-bold transition-all shadow-md hover:shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Download CSV/Excel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Table Container -->
+        <div id="resultsTableContainer" class="hidden w-full max-w-5xl mt-8 cursor-default animate-fade-in-up pb-10">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-6 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-gray-900">Preview Results</h3>
+                    <div class="flex items-center space-x-2">
+                        <button id="prevPageBtn"
+                            class="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Previous</button>
+                        <span id="pageIndicator"
+                            class="text-xs font-mono font-medium text-gray-500 bg-gray-100 px-3 py-1.5 rounded-lg">Page
+                            1</span>
+                        <button id="nextPageBtn"
+                            class="px-3 py-1.5 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Next</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-500">
+                        <thead class="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-100">
+                            <tr id="tableHead">
+                                <!-- Headers -->
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody" class="bg-white divide-y divide-gray-100">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-auto">
+        <div
+            class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-sm text-gray-400">© 2025 LeadScraper Tool. All rights reserved.</p>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-gray-500 font-medium">Built by</span>
+                <a href="https://flowreativ.com" target="_blank"
+                    class="text-sm font-bold text-black border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-50 transition-colors">flowreativ.com</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allResults = [];
+        let currentPage = 1;
+        const resultsPerPage = 10;
+
+
+
+        // CSV Export fallback using Blob if SheetJS fails or for simplicity
+        function exportToCSV(data) {
+            const replacer = (key, value) => value === null ? '' : value;
+            const header = Object.keys(data[0]);
+            let csv = data.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','));
+            csv.unshift(header.join(','));
+            csv = csv.join('\r\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'leads_export.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Excel Export using SheetJS
+        function exportToExcel() {
+            if (typeof XLSX === 'undefined') {
+                console.warn("SheetJS not loaded, falling back to basic CSV");
+                exportToCSV(allResults);
+                return;
+            }
+            if (allResults.length === 0) return;
+
+            const ws = XLSX.utils.json_to_sheet(allResults);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Leads");
+            XLSX.writeFile(wb, "Leads_Result.xlsx");
+        }
+
+        document.getElementById('downloadLink').addEventListener('click', function (e) {
+            e.preventDefault();
+            exportToExcel();
+        });
+
+        document.getElementById('scrapeForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const originalBtnText = submitBtn.innerHTML;
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loader"></div>';
+
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.classList.add('hidden');
+            document.getElementById('resultsTableContainer').classList.add('hidden');
+
+            // Reset Data
+            allResults = [];
+            currentPage = 1;
+
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch('/scrape', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                const msgText = document.getElementById('msgText');
+                const downloadContainer = document.getElementById('downloadContainer');
+
+                statusDiv.classList.remove('hidden');
+                msgText.textContent = data.message;
+
+                if (data.status === 'success') {
+                    statusDiv.className = "mt-8 p-4 rounded-xl bg-green-50 border border-green-100 flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up";
+                    msgText.className = "text-sm font-bold text-green-700";
+
+                    if (data.results && data.results.length > 0) {
+                        allResults = data.results;
+                        downloadContainer.classList.remove('hidden'); // Show download button
+                        renderTablePage(1);
+                    }
+
+                } else {
+                    const isError = data.status === 'danger';
+                    statusDiv.className = `mt-8 p-4 rounded-xl border flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up ${isError ? 'bg-red-50 border-red-100' : 'bg-yellow-50 border-yellow-100'}`;
+                    msgText.className = `text-sm font-bold ${isError ? 'text-red-700' : 'text-yellow-700'}`;
+                    downloadContainer.classList.add('hidden');
+                }
+
+            } catch (error) {
+                console.error(error);
+                const statusDiv = document.getElementById('statusMessage');
+                statusDiv.classList.remove('hidden');
+                statusDiv.className = "mt-8 p-4 rounded-xl bg-red-50 border border-red-100 flex flex-col sm:flex-row justify-between items-center gap-4 animate-fade-in-up";
+                document.getElementById('msgText').className = "text-sm font-bold text-red-700";
+                document.getElementById('msgText').textContent = "Connection Error. Check console/terminal.";
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+            }
+        });
+
+        function renderTablePage(page) {
+            currentPage = page;
+            const tableContainer = document.getElementById('resultsTableContainer');
+            const tableHead = document.getElementById('tableHead');
+            const tableBody = document.getElementById('tableBody');
+            const pageIndicator = document.getElementById('pageIndicator');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            // Calculate Slice
+            const start = (page - 1) * resultsPerPage;
+            const end = start + resultsPerPage;
+            const pageData = allResults.slice(start, end);
+            const totalPages = Math.ceil(allResults.length / resultsPerPage);
+
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (pageData.length === 0) return;
+
+            // Headers
+            const keys = Object.keys(pageData[0]);
+            keys.forEach(key => {
+                const th = document.createElement('th');
+                th.className = "px-6 py-4 font-semibold text-gray-900 whitespace-nowrap";
+                th.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+                tableHead.appendChild(th);
+            });
+
+            // Body
+            pageData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50 transition-colors";
+                keys.forEach(key => {
+                    const td = document.createElement('td');
+                    td.className = "px-6 py-4 font-medium text-gray-900";
+                    td.textContent = row[key];
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+
+            // Controls
+            pageIndicator.textContent = `Page ${currentPage} of ${totalPages}`;
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+
+            tableContainer.classList.remove('hidden');
+            if (page === 1) tableContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        document.getElementById('prevPageBtn').addEventListener('click', () => {
+            if (currentPage > 1) renderTablePage(currentPage - 1);
+        });
+
+        document.getElementById('nextPageBtn').addEventListener('click', () => {
+            const totalPages = Math.ceil(allResults.length / resultsPerPage);
+            if (currentPage < totalPages) renderTablePage(currentPage + 1);
+        });
+    </script>
+</body>
+
+</html>
