@@ -318,11 +318,13 @@
 
             if (pageData.length === 0) return;
 
+            // Defined Columns for Table (exclude raw lat/lng/booleans for cleaner UI)
+            const displayKeys = ['name', 'category', 'rating', 'review_count', 'phone', 'website', 'address'];
+
             // Headers
-            const keys = Object.keys(pageData[0]);
-            keys.forEach(key => {
+            displayKeys.forEach(key => {
                 const th = document.createElement('th');
-                th.className = "px-6 py-4 font-semibold text-gray-900 whitespace-nowrap";
+                th.className = "px-6 py-4 font-semibold text-gray-900 whitespace-nowrap bg-gray-50";
                 th.textContent = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
                 tableHead.appendChild(th);
             });
@@ -330,11 +332,21 @@
             // Body
             pageData.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 transition-colors";
-                keys.forEach(key => {
+                tr.className = "hover:bg-gray-50 transition-colors border-b border-gray-100";
+
+                displayKeys.forEach(key => {
                     const td = document.createElement('td');
-                    td.className = "px-6 py-4 font-medium text-gray-900";
-                    td.textContent = row[key];
+                    td.className = "px-6 py-4 text-sm text-gray-700 whitespace-nowrap";
+
+                    const value = row[key] || '-';
+
+                    if (key === 'website' && row[key] && row[key] !== 'Not Found') {
+                        td.innerHTML = `<a href="${row[key]}" target="_blank" class="text-blue-600 hover:underline">Visit Site</a>`;
+                    } else if (key === 'rating') {
+                        td.innerHTML = `<span class="font-bold text-yellow-500">★</span> ${value}`;
+                    } else {
+                        td.textContent = value;
+                    }
                     tr.appendChild(td);
                 });
                 tableBody.appendChild(tr);

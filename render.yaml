@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: gmaps-scraper
+    env: python
+    buildCommand: pip install -r requirements.txt && playwright install chromium
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0

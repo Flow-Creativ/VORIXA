@@ -13,6 +13,12 @@ def index():
 
 @app.route('/scrape', methods=['POST'])
 def scrape():
+    keyword = request.form.get('keyword')
+    try:
+        max_results = int(request.form.get('max_results', 10))
+    except:
+        max_results = 10
+
     if not keyword:
         return jsonify({"status": "danger", "message": "Keyword is required"})
 
@@ -36,4 +42,5 @@ def scrape():
         return jsonify({"message": f"Error: {str(e)}", "status": "danger"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=8080)
+    import os
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 8080)))
