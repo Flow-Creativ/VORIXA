@@ -3,4 +3,6 @@
 set -o errexit
 
 pip install -r requirements.txt
-playwright install chromium
+echo "➡️ Installing Playwright Chromium..."
+playwright install chromium --with-deps
+echo "✅ Playwright Installation Complete."
